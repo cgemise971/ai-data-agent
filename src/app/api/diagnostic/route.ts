@@ -28,13 +28,19 @@ TON ROLE:
 C'est la question ${messages.length > 0 ? Math.floor(messages.length / 2) + 1 : 1} sur 5.
 ${messages.length >= 8 ? "C'est ta DERNIERE question. Termine par: 'Merci pour ces informations precieuses. Je vais maintenant generer votre diagnostic personnalise.'" : ""}`;
 
+    // If no messages yet, seed with a user message to trigger the first question
+    const chatMessages =
+      messages.length === 0
+        ? [{ role: "user" as const, content: `Bonjour, je suis dans le secteur ${sectorName}. Je souhaite un diagnostic IA pour mon entreprise.` }]
+        : messages.map((m: { role: string; content: string }) => ({
+            role: m.role as "user" | "assistant",
+            content: m.content,
+          }));
+
     const result = streamText({
       model: anthropic("claude-sonnet-4-20250514"),
       system: systemPrompt,
-      messages: messages.map((m: { role: string; content: string }) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      })),
+      messages: chatMessages,
     });
     return result.toTextStreamResponse();
   }
