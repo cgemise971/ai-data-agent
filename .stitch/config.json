@@ -1,0 +1,13 @@
+{
+  "projectName": "ai-data-agent",
+  "defaultDevice": "DESKTOP",
+  "designSystem": {
+    "framework": "shadcn/ui",
+    "cssFramework": "tailwindcss-v4",
+    "primaryColor": "#6366F1",
+    "accentColors": ["#8B5CF6", "#06B6D4", "#34D399"],
+    "backgroundColor": "#0F172A",
+    "font": "Syne (headings), Geist (body)"
+  },
+  "stitch": { "defaultModel": "standard", "previewPort": 3333 }
+}
