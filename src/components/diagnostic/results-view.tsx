@@ -339,8 +339,10 @@ export function ResultsView({ result }: ResultsViewProps) {
 
 /* ---- Contact + PDF + WhatsApp ---- */
 
-const PHONE_NUMBER = "33616817040";
+const PHONE_DISPLAY = "06 16 81 70 40";
+const PHONE_TEL = "+33616817040";
 const WHATSAPP_NUMBER = "33616817040";
+const OWNER_EMAIL = "cgemise64@gmail.com";
 
 function ContactSection({
   result,
@@ -452,29 +454,35 @@ ${result.roadmap.map((p, i) => `<div class="phase phase-${i + 1}"><h3>${p.phase}
     }
   }
 
-  async function handleEmailSubmit(e: React.FormEvent) {
+  function buildEmailBody(): string {
+    let body = `DIAGNOSTIC IA — ${sectorName}\n\n`;
+    body += `RESUME\n${result.summary}\n\n`;
+    body += `MATURITE IA\n`;
+    result.maturityScores.forEach((s) => {
+      body += `  ${s.dimension}: ${s.score}/100\n`;
+    });
+    body += `\nOPPORTUNITES\n`;
+    result.opportunities.forEach((o, i) => {
+      body += `${i + 1}. ${o.title} (ROI: ${o.roi}) — ${o.description}\n`;
+    });
+    body += `\nROI: ${result.roiEstimate.invested} investi → ${result.roiEstimate.saved} economises (${result.roiEstimate.ratio})`;
+    return body;
+  }
+
+  function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
-    try {
-      const res = await fetch("/api/send-diagnostic", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, sectorName, result }),
-      });
-      if (res.ok) {
-        setEmailSent(true);
-      }
-    } catch {
-      // Fallback : marquer comme envoye pour le demo
-      setEmailSent(true);
-    }
+    const subject = encodeURIComponent(`Diagnostic IA — ${sectorName}`);
+    const body = encodeURIComponent(buildEmailBody());
+    // Ouvre le client mail du prospect avec le diagnostic pre-rempli
+    // CC vers le proprietaire pour recevoir une copie
+    window.open(`mailto:${email}?cc=${OWNER_EMAIL}&subject=${subject}&body=${body}`, "_blank");
+    setEmailSent(true);
   }
 
   function getWhatsAppUrl(): string {
-    const message = encodeURIComponent(
-      `Bonjour ! Je viens de completer le diagnostic IA pour le secteur ${sectorName}. J'aimerais en discuter avec vous.\n\nResume: ${result.summary.slice(0, 200)}...`
-    );
-    return `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+    const msg = `Bonjour ! Je viens de completer le diagnostic IA pour le secteur *${sectorName}*.\n\nJ'aimerais en discuter avec vous.\n\nResume : ${result.summary.slice(0, 150)}...`;
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   }
 
   return (
@@ -587,12 +595,12 @@ ${result.roadmap.map((p, i) => `<div class="phase phase-${i + 1}"><h3>${p.phase}
 
           {/* Phone */}
           <a
-            href={`tel:+${PHONE_NUMBER}`}
+            href={`tel:${PHONE_TEL}`}
             className="flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-[1.02] font-[family-name:var(--font-geist-sans)]"
             style={{ background: "rgba(217,119,6,0.15)", border: "1px solid rgba(217,119,6,0.25)" }}
           >
             <Phone className="w-4 h-4 text-amber-500" />
-            <span className="text-amber-500">Appeler directement</span>
+            <span className="text-amber-500">{PHONE_DISPLAY}</span>
           </a>
         </div>
       </div>
