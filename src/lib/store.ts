@@ -1,32 +1,43 @@
 import { create } from "zustand";
-import type { DataSummary, AnalysisResult } from "@/types";
 
-interface AnalysisState {
-  csvContent: string | null;
-  fileName: string | null;
-  summary: DataSummary | null;
-  result: AnalysisResult | null;
-  isAnalyzing: boolean;
-  error: string | null;
-  setCSV: (content: string, fileName: string) => void;
-  setSummary: (summary: DataSummary) => void;
-  setResult: (result: AnalysisResult) => void;
-  setAnalyzing: (v: boolean) => void;
-  setError: (error: string | null) => void;
+export interface DiagnosticMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface DiagnosticResult {
+  summary: string;
+  maturityScores: { dimension: string; score: number; max: number }[];
+  opportunities: { title: string; impact: string; effort: string; roi: string; description: string }[];
+  roadmap: { phase: string; duration: string; actions: string[] }[];
+  roiEstimate: { invested: string; saved: string; ratio: string };
+}
+
+interface DiagnosticState {
+  sectorId: string | null;
+  step: "sector" | "conversation" | "analyzing" | "results";
+  messages: DiagnosticMessage[];
+  questionCount: number;
+  result: DiagnosticResult | null;
+  setSector: (id: string) => void;
+  addMessage: (msg: DiagnosticMessage) => void;
+  incrementQuestion: () => void;
+  setStep: (step: DiagnosticState["step"]) => void;
+  setResult: (result: DiagnosticResult) => void;
   reset: () => void;
 }
 
-export const useAnalysisStore = create<AnalysisState>((set) => ({
-  csvContent: null,
-  fileName: null,
-  summary: null,
+export const useDiagnosticStore = create<DiagnosticState>((set) => ({
+  sectorId: null,
+  step: "sector",
+  messages: [],
+  questionCount: 0,
   result: null,
-  isAnalyzing: false,
-  error: null,
-  setCSV: (content, fileName) => set({ csvContent: content, fileName, result: null, error: null }),
-  setSummary: (summary) => set({ summary }),
-  setResult: (result) => set({ result, isAnalyzing: false }),
-  setAnalyzing: (isAnalyzing) => set({ isAnalyzing }),
-  setError: (error) => set({ error, isAnalyzing: false }),
-  reset: () => set({ csvContent: null, fileName: null, summary: null, result: null, isAnalyzing: false, error: null }),
+  setSector: (sectorId) => set({ sectorId, step: "conversation" }),
+  addMessage: (msg) => set((s) => ({ messages: [...s.messages, msg] })),
+  incrementQuestion: () => set((s) => ({ questionCount: s.questionCount + 1 })),
+  setStep: (step) => set({ step }),
+  setResult: (result) => set({ result, step: "results" }),
+  reset: () => set({ sectorId: null, step: "sector", messages: [], questionCount: 0, result: null }),
 }));

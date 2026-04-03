@@ -21,9 +21,9 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "DataPulse AI — Analysez vos donnees en secondes",
+  title: "AI Diagnostic — Identifiez vos opportunites IA en 5 minutes",
   description:
-    "Uploadez un CSV, obtenez des insights IA instantanes. Graphiques, tendances, anomalies — en un clic.",
+    "Diagnostic gratuit et personnalise. Decouvrez comment l'IA peut transformer votre business selon votre secteur.",
 };
 
 export default function RootLayout({
