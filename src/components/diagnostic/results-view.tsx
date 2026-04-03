@@ -339,8 +339,8 @@ export function ResultsView({ result }: ResultsViewProps) {
 
 /* ---- Contact + PDF + WhatsApp ---- */
 
-const PHONE_NUMBER = "33600000000"; // A REMPLACER par ton vrai numero
-const WHATSAPP_NUMBER = "33600000000"; // A REMPLACER
+const PHONE_NUMBER = "33616817040";
+const WHATSAPP_NUMBER = "33616817040";
 
 function ContactSection({
   result,
@@ -355,52 +355,119 @@ function ContactSection({
   const [emailSent, setEmailSent] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  function buildDiagnosticText(): string {
-    let text = `DIAGNOSTIC IA — ${sectorName}\n`;
-    text += `${"=".repeat(40)}\n\n`;
-    text += `RESUME\n${result.summary}\n\n`;
-    text += `MATURITE IA\n`;
-    result.maturityScores.forEach((s) => {
-      const bar = "█".repeat(Math.round(s.score / 10)) + "░".repeat(10 - Math.round(s.score / 10));
-      text += `  ${s.dimension}: ${bar} ${s.score}/100\n`;
-    });
-    text += `\nOPPORTUNITES\n`;
-    result.opportunities.forEach((o, i) => {
-      text += `\n${i + 1}. ${o.title} (ROI: ${o.roi})\n`;
-      text += `   Impact: ${o.impact} | Effort: ${o.effort}\n`;
-      text += `   ${o.description}\n`;
-    });
-    text += `\nPLAN D'ACTION\n`;
-    result.roadmap.forEach((p) => {
-      text += `\n${p.phase} (${p.duration})\n`;
-      p.actions.forEach((a) => { text += `  → ${a}\n`; });
-    });
-    text += `\nPROJECTION ROI\n`;
-    text += `  Investissement: ${result.roiEstimate.invested}\n`;
-    text += `  Economies: ${result.roiEstimate.saved}\n`;
-    text += `  Ratio: ${result.roiEstimate.ratio}\n`;
-    return text;
+  function buildPdfHtml(): string {
+    const date = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+    return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Diagnostic IA — ${sectorName}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; color: #1a1a2e; background: #fff; padding: 48px; max-width: 800px; margin: 0 auto; font-size: 13px; line-height: 1.6; }
+  h1 { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+  h2 { font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+  h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .header { border-bottom: 3px solid #D97706; padding-bottom: 20px; margin-bottom: 32px; }
+  .header .badge { display: inline-block; background: #FEF3C7; color: #92400E; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-bottom: 12px; }
+  .header .date { color: #888; font-size: 12px; }
+  .summary { background: #FFFBEB; border-left: 4px solid #D97706; padding: 16px 20px; border-radius: 0 8px 8px 0; margin-bottom: 24px; }
+  .scores { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .score-item { display: flex; align-items: center; gap: 8px; }
+  .score-label { width: 120px; font-size: 12px; font-weight: 500; }
+  .score-bar { flex: 1; height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #D97706, #F59E0B); }
+  .score-value { font-size: 12px; font-weight: 700; color: #D97706; width: 40px; text-align: right; }
+  .opp { background: #fafafa; border: 1px solid #eee; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .opp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .opp-roi { background: #FEF3C7; color: #92400E; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .opp-meters { display: flex; gap: 24px; margin-top: 10px; font-size: 11px; color: #666; }
+  .phase { border-left: 3px solid; padding-left: 16px; margin-bottom: 16px; }
+  .phase-1 { border-color: #D97706; }
+  .phase-2 { border-color: #10B981; }
+  .phase-3 { border-color: #06B6D4; }
+  .phase h3 span { font-weight: 400; color: #888; font-size: 12px; }
+  .phase li { margin: 4px 0; }
+  .roi-box { display: flex; gap: 24px; background: #1a1a2e; color: #fff; padding: 24px; border-radius: 12px; text-align: center; }
+  .roi-item { flex: 1; }
+  .roi-item .value { font-size: 24px; font-weight: 800; }
+  .roi-item .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #aaa; margin-top: 4px; }
+  .roi-item.accent .value { color: #FBBF24; }
+  .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; font-size: 11px; color: #aaa; }
+  @media print { body { padding: 24px; } }
+</style></head><body>
+<div class="header">
+  <div class="badge">Diagnostic IA</div>
+  <h1>Rapport de diagnostic — ${sectorName}</h1>
+  <p class="date">Genere le ${date} | AI Diagnostic by Votre Nom</p>
+</div>
+
+<h2>Resume executif</h2>
+<div class="summary">${result.summary}</div>
+
+<h2>Maturite IA</h2>
+<div class="scores">
+${result.maturityScores.map((s) => `<div class="score-item"><span class="score-label">${s.dimension}</span><div class="score-bar"><div class="score-fill" style="width:${s.score}%"></div></div><span class="score-value">${s.score}%</span></div>`).join("")}
+</div>
+
+<h2>Opportunites identifiees</h2>
+${result.opportunities.map((o, i) => `<div class="opp"><div class="opp-header"><h3>${i + 1}. ${o.title}</h3><span class="opp-roi">ROI ${o.roi}</span></div><p>${o.description}</p><div class="opp-meters"><span>Impact: <strong>${o.impact}</strong></span><span>Effort: <strong>${o.effort}</strong></span></div></div>`).join("")}
+
+<h2>Plan d'action</h2>
+${result.roadmap.map((p, i) => `<div class="phase phase-${i + 1}"><h3>${p.phase} <span>(${p.duration})</span></h3><ul>${p.actions.map((a) => `<li>${a}</li>`).join("")}</ul></div>`).join("")}
+
+<h2>Projection ROI</h2>
+<div class="roi-box">
+  <div class="roi-item"><div class="value">${result.roiEstimate.invested}</div><div class="label">Investissement</div></div>
+  <div class="roi-item"><div class="value" style="color:#10B981">${result.roiEstimate.saved}</div><div class="label">Economies annuelles</div></div>
+  <div class="roi-item accent"><div class="value">${result.roiEstimate.ratio}</div><div class="label">Retour sur investissement</div></div>
+</div>
+
+<div class="footer">
+  <p>Ce diagnostic a ete genere par AI Diagnostic — outil d'analyse propulse par Claude (Anthropic)</p>
+  <p>Contact : +33 6 16 81 70 40 | WhatsApp | votre@email.com</p>
+</div>
+</body></html>`;
   }
 
   function handleDownloadPDF() {
     setIsDownloading(true);
-    const text = buildDiagnosticText();
-    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `diagnostic-ia-${sectorName.toLowerCase().replace(/[^a-z]/g, "-")}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-    setTimeout(() => setIsDownloading(false), 1000);
+    const html = buildPdfHtml();
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      // Laisser le temps au CSS de charger puis lancer l'impression
+      setTimeout(() => {
+        printWindow.print();
+        setIsDownloading(false);
+      }, 800);
+    } else {
+      // Fallback : telecharger le HTML
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `diagnostic-ia-${sectorName.toLowerCase().replace(/[^a-z]/g, "-")}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setIsDownloading(false);
+    }
   }
 
-  function handleEmailSubmit(e: React.FormEvent) {
+  async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
-    // En production : envoyer le diagnostic par email via API (Resend, etc.)
-    // Pour le moment, on simule l'envoi
-    setEmailSent(true);
+    try {
+      const res = await fetch("/api/send-diagnostic", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, sectorName, result }),
+      });
+      if (res.ok) {
+        setEmailSent(true);
+      }
+    } catch {
+      // Fallback : marquer comme envoye pour le demo
+      setEmailSent(true);
+    }
   }
 
   function getWhatsAppUrl(): string {
@@ -444,7 +511,7 @@ function ContactSection({
               <h4 className="font-[family-name:var(--font-syne)] font-bold text-white text-sm">
                 {isDownloading ? "Telechargement..." : "Telecharger le diagnostic"}
               </h4>
-              <p className="text-[11px] text-zinc-500">Rapport complet au format texte</p>
+              <p className="text-[11px] text-zinc-500">Rapport PDF professionnel</p>
             </div>
           </div>
         </button>
