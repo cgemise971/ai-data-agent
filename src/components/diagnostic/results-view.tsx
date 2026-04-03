@@ -573,34 +573,34 @@ ${result.roadmap.map((p, i) => `<div class="phase phase-${i + 1}"><h3>${p.phase}
       </div>
 
       {/* Direct contact */}
-      <div className="animated-border glow-amber rounded-2xl p-6">
-        <h4 className="font-[family-name:var(--font-syne)] font-bold text-white text-base mb-2 text-center">
+      <div className="relative glow-amber rounded-2xl p-6 overflow-hidden" style={{ background: "#18181B", border: "1px solid rgba(217,119,6,0.3)" }}>
+        <h4 className="font-[family-name:var(--font-syne)] font-bold text-white text-base mb-2 text-center relative z-10">
           Discutons de vive voix
         </h4>
-        <p className="text-zinc-500 text-xs text-center mb-5 font-[family-name:var(--font-geist-sans)]">
+        <p className="text-zinc-500 text-xs text-center mb-5 font-[family-name:var(--font-geist-sans)] relative z-10">
           Je vous accompagne personnellement dans votre transformation IA
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
           {/* WhatsApp */}
           <a
             href={getWhatsAppUrl()}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-[1.02] font-[family-name:var(--font-geist-sans)]"
-            style={{ background: "rgba(37,211,102,0.15)", border: "1px solid rgba(37,211,102,0.25)" }}
+            className="flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] cursor-pointer"
+            style={{ background: "rgba(37,211,102,0.15)", border: "1px solid rgba(37,211,102,0.3)", color: "#25D366" }}
           >
-            <MessageCircle className="w-4 h-4" style={{ color: "#25D366" }} />
-            <span style={{ color: "#25D366" }}>WhatsApp</span>
+            <MessageCircle className="w-4 h-4" />
+            WhatsApp
           </a>
 
           {/* Phone */}
           <a
             href={`tel:${PHONE_TEL}`}
-            className="flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-[1.02] font-[family-name:var(--font-geist-sans)]"
-            style={{ background: "rgba(217,119,6,0.15)", border: "1px solid rgba(217,119,6,0.25)" }}
+            className="flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] cursor-pointer"
+            style={{ background: "rgba(217,119,6,0.15)", border: "1px solid rgba(217,119,6,0.3)", color: "#F59E0B" }}
           >
-            <Phone className="w-4 h-4 text-amber-500" />
-            <span className="text-amber-500">{PHONE_DISPLAY}</span>
+            <Phone className="w-4 h-4" />
+            {PHONE_DISPLAY}
           </a>
         </div>
       </div>
