@@ -1,0 +1,15 @@
+date,revenue,users,churn_rate,plan,region,support_tickets
+2026-01-01,12400,340,3.2,free,Europe,45
+2026-01-08,13200,365,2.9,free,Europe,38
+2026-01-15,14800,410,2.5,pro,Europe,32
+2026-01-22,13900,395,3.1,pro,Amerique,41
+2026-01-29,15600,445,2.2,pro,Europe,28
+2026-02-05,16200,470,2.0,enterprise,Asie,22
+2026-02-12,15100,430,2.8,pro,Europe,35
+2026-02-19,17800,520,1.8,enterprise,Amerique,19
+2026-02-26,18500,550,1.5,enterprise,Europe,15
+2026-03-05,16900,490,2.3,pro,Asie,29
+2026-03-12,19200,580,1.4,enterprise,Europe,12
+2026-03-19,20100,610,1.2,enterprise,Amerique,10
+2026-03-26,18700,560,1.9,pro,Europe,24
+2026-04-02,21500,650,1.1,enterprise,Europe,8
