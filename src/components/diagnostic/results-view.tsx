@@ -9,7 +9,8 @@ import {
   Radar,
   ResponsiveContainer,
 } from "recharts";
-import { TrendingUp, Zap, Clock, ArrowRight, RefreshCw } from "lucide-react";
+import { TrendingUp, Zap, Clock, ArrowRight, RefreshCw, Download, Phone, MessageCircle, Mail, Check } from "lucide-react";
+import { useState } from "react";
 import type { DiagnosticResult } from "@/lib/store";
 import { useDiagnosticStore } from "@/lib/store";
 import { SECTORS } from "@/lib/sectors";
@@ -330,32 +331,215 @@ export function ResultsView({ result }: ResultsViewProps) {
         </div>
       </motion.div>
 
-      {/* CTA + Reset */}
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
-        className="flex flex-col sm:flex-row gap-4 pt-4"
-      >
-        <a
-          href="https://calendly.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="animated-border flex-1 py-4 px-6 rounded-xl font-[family-name:var(--font-syne)] font-bold text-sm text-white text-center transition-all hover:opacity-90 flex items-center justify-center gap-2"
-          style={{ background: "rgba(217,119,6,0.2)" }}
+      {/* Contact & Download section */}
+      <ContactSection result={result} sectorName={sector?.name || ""} reset={reset} />
+    </motion.div>
+  );
+}
+
+/* ---- Contact + PDF + WhatsApp ---- */
+
+const PHONE_NUMBER = "33600000000"; // A REMPLACER par ton vrai numero
+const WHATSAPP_NUMBER = "33600000000"; // A REMPLACER
+
+function ContactSection({
+  result,
+  sectorName,
+  reset,
+}: {
+  result: DiagnosticResult;
+  sectorName: string;
+  reset: () => void;
+}) {
+  const [email, setEmail] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  function buildDiagnosticText(): string {
+    let text = `DIAGNOSTIC IA — ${sectorName}\n`;
+    text += `${"=".repeat(40)}\n\n`;
+    text += `RESUME\n${result.summary}\n\n`;
+    text += `MATURITE IA\n`;
+    result.maturityScores.forEach((s) => {
+      const bar = "█".repeat(Math.round(s.score / 10)) + "░".repeat(10 - Math.round(s.score / 10));
+      text += `  ${s.dimension}: ${bar} ${s.score}/100\n`;
+    });
+    text += `\nOPPORTUNITES\n`;
+    result.opportunities.forEach((o, i) => {
+      text += `\n${i + 1}. ${o.title} (ROI: ${o.roi})\n`;
+      text += `   Impact: ${o.impact} | Effort: ${o.effort}\n`;
+      text += `   ${o.description}\n`;
+    });
+    text += `\nPLAN D'ACTION\n`;
+    result.roadmap.forEach((p) => {
+      text += `\n${p.phase} (${p.duration})\n`;
+      p.actions.forEach((a) => { text += `  → ${a}\n`; });
+    });
+    text += `\nPROJECTION ROI\n`;
+    text += `  Investissement: ${result.roiEstimate.invested}\n`;
+    text += `  Economies: ${result.roiEstimate.saved}\n`;
+    text += `  Ratio: ${result.roiEstimate.ratio}\n`;
+    return text;
+  }
+
+  function handleDownloadPDF() {
+    setIsDownloading(true);
+    const text = buildDiagnosticText();
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `diagnostic-ia-${sectorName.toLowerCase().replace(/[^a-z]/g, "-")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setTimeout(() => setIsDownloading(false), 1000);
+  }
+
+  function handleEmailSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    // En production : envoyer le diagnostic par email via API (Resend, etc.)
+    // Pour le moment, on simule l'envoi
+    setEmailSent(true);
+  }
+
+  function getWhatsAppUrl(): string {
+    const message = encodeURIComponent(
+      `Bonjour ! Je viens de completer le diagnostic IA pour le secteur ${sectorName}. J'aimerais en discuter avec vous.\n\nResume: ${result.summary.slice(0, 200)}...`
+    );
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.6 }}
+      className="space-y-6 pt-4"
+    >
+      {/* Section header */}
+      <div className="text-center">
+        <h3 className="font-[family-name:var(--font-syne)] font-bold text-white text-xl mb-2">
+          Passons a l&apos;action
+        </h3>
+        <p className="text-zinc-500 text-sm font-[family-name:var(--font-geist-sans)]">
+          Recuperez votre diagnostic et discutons ensemble de sa mise en oeuvre
+        </p>
+      </div>
+
+      {/* Download + Email */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Download */}
+        <button
+          onClick={handleDownloadPDF}
+          disabled={isDownloading}
+          className="glass-card rounded-2xl p-6 text-left transition-all hover:bg-zinc-800/50 group"
         >
-          <Zap className="w-4 h-4 text-amber-400" />
-          Discutons de votre transformation
-        </a>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: "rgba(217,119,6,0.15)" }}>
+              <Download className="w-5 h-5 text-amber-500" />
+            </div>
+            <div>
+              <h4 className="font-[family-name:var(--font-syne)] font-bold text-white text-sm">
+                {isDownloading ? "Telechargement..." : "Telecharger le diagnostic"}
+              </h4>
+              <p className="text-[11px] text-zinc-500">Rapport complet au format texte</p>
+            </div>
+          </div>
+        </button>
+
+        {/* Email */}
+        <div className="glass-card rounded-2xl p-6">
+          {emailSent ? (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: "rgba(16,185,129,0.15)" }}>
+                <Check className="w-5 h-5 text-emerald-500" />
+              </div>
+              <div>
+                <h4 className="font-[family-name:var(--font-syne)] font-bold text-white text-sm">
+                  Diagnostic envoye !
+                </h4>
+                <p className="text-[11px] text-zinc-500">Verifiez votre boite mail</p>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleEmailSubmit}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(99,102,241,0.15)" }}>
+                  <Mail className="w-5 h-5 text-indigo-400" />
+                </div>
+                <h4 className="font-[family-name:var(--font-syne)] font-bold text-white text-sm">
+                  Recevoir par email
+                </h4>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="votre@email.com"
+                  required
+                  className="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 outline-none focus:border-amber-600 transition-colors font-[family-name:var(--font-geist-sans)]"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg text-xs font-bold text-white transition-all hover:opacity-90"
+                  style={{ background: "linear-gradient(135deg, #6366F1, #8B5CF6)" }}
+                >
+                  Envoyer
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+
+      {/* Direct contact */}
+      <div className="animated-border glow-amber rounded-2xl p-6">
+        <h4 className="font-[family-name:var(--font-syne)] font-bold text-white text-base mb-2 text-center">
+          Discutons de vive voix
+        </h4>
+        <p className="text-zinc-500 text-xs text-center mb-5 font-[family-name:var(--font-geist-sans)]">
+          Je vous accompagne personnellement dans votre transformation IA
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* WhatsApp */}
+          <a
+            href={getWhatsAppUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-[1.02] font-[family-name:var(--font-geist-sans)]"
+            style={{ background: "rgba(37,211,102,0.15)", border: "1px solid rgba(37,211,102,0.25)" }}
+          >
+            <MessageCircle className="w-4 h-4" style={{ color: "#25D366" }} />
+            <span style={{ color: "#25D366" }}>WhatsApp</span>
+          </a>
+
+          {/* Phone */}
+          <a
+            href={`tel:+${PHONE_NUMBER}`}
+            className="flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-[1.02] font-[family-name:var(--font-geist-sans)]"
+            style={{ background: "rgba(217,119,6,0.15)", border: "1px solid rgba(217,119,6,0.25)" }}
+          >
+            <Phone className="w-4 h-4 text-amber-500" />
+            <span className="text-amber-500">Appeler directement</span>
+          </a>
+        </div>
+      </div>
+
+      {/* Reset */}
+      <div className="text-center">
         <button
           onClick={reset}
-          className="py-4 px-6 rounded-xl font-[family-name:var(--font-syne)] font-semibold text-sm text-zinc-400 transition-all hover:text-white hover:bg-zinc-800 flex items-center justify-center gap-2"
-          style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+          className="py-3 px-6 rounded-xl font-[family-name:var(--font-geist-sans)] text-sm text-zinc-500 transition-all hover:text-white hover:bg-zinc-800/50 inline-flex items-center gap-2"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className="w-3.5 h-3.5" />
           Nouveau diagnostic
         </button>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
