@@ -157,7 +157,10 @@ export function ChatDiagnostic() {
     }
   };
 
+  // Count only REAL user answers (not the seed message from the API)
   const userAnsweredCount = messages.filter((m) => m.role === "user").length;
+  // The AI asks question N AFTER the user answers N-1, so progress = answers given
+  const questionsAsked = messages.filter((m) => m.role === "assistant").length;
   const progressPercent = Math.min((userAnsweredCount / MAX_QUESTIONS) * 100, 100);
 
   return (
@@ -169,7 +172,7 @@ export function ChatDiagnostic() {
             Progression du diagnostic
           </span>
           <span className="text-xs text-amber-600 font-[family-name:var(--font-geist-sans)]">
-            {userAnsweredCount}/{MAX_QUESTIONS} questions
+            {userAnsweredCount} reponse{userAnsweredCount > 1 ? "s" : ""} sur {MAX_QUESTIONS}
           </span>
         </div>
         <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">

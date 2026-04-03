@@ -18,39 +18,6 @@ interface ResultsViewProps {
   result: DiagnosticResult;
 }
 
-function ImpactBadge({ value }: { value: string }) {
-  const colorMap: Record<string, string> = {
-    fort: "rgba(16,185,129,0.2)",
-    moyen: "rgba(245,158,11,0.2)",
-    faible: "rgba(99,102,241,0.2)",
-  };
-  const textMap: Record<string, string> = {
-    fort: "#10B981",
-    moyen: "#F59E0B",
-    faible: "#818CF8",
-  };
-  const key = value.toLowerCase();
-  return (
-    <span
-      className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest font-[family-name:var(--font-geist-sans)]"
-      style={{ background: colorMap[key] || colorMap.moyen, color: textMap[key] || textMap.moyen }}
-    >
-      {value}
-    </span>
-  );
-}
-
-function EffortBadge({ value }: { value: string }) {
-  return (
-    <span
-      className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest font-[family-name:var(--font-geist-sans)]"
-      style={{ background: "rgba(6,182,212,0.15)", color: "#06B6D4" }}
-    >
-      {value}
-    </span>
-  );
-}
-
 export function ResultsView({ result }: ResultsViewProps) {
   const { sectorId, reset } = useDiagnosticStore();
   const sector = SECTORS.find((s) => s.id === sectorId);
@@ -221,38 +188,89 @@ export function ResultsView({ result }: ResultsViewProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <h3 className="font-[family-name:var(--font-syne)] font-bold text-white text-xl mb-4">
+        <h3 className="font-[family-name:var(--font-syne)] font-bold text-white text-xl mb-2">
           Opportunites identifiees
         </h3>
-        <div className="space-y-3">
+        <p className="text-zinc-500 text-sm font-[family-name:var(--font-geist-sans)] mb-6">
+          Classees par impact potentiel sur votre activite
+        </p>
+        <div className="space-y-4">
           {result.opportunities.map((opp, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, x: -16 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: 0.35 + i * 0.07 }}
-              className="glass-card rounded-xl p-5"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.35 + i * 0.1 }}
+              className="glass-card rounded-2xl p-6"
             >
-              <div className="flex items-start justify-between gap-4 mb-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="font-[family-name:var(--font-syne)] font-bold text-white text-sm">
+              {/* Title + ROI */}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0"
+                    style={{ background: `rgba(217,119,6,${0.15 - i * 0.02})` }}>
+                    <span className="text-amber-500 font-[family-name:var(--font-syne)] text-sm font-bold">{i + 1}</span>
+                  </div>
+                  <h4 className="font-[family-name:var(--font-syne)] font-bold text-white text-base">
                     {opp.title}
                   </h4>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <ImpactBadge value={opp.impact} />
-                  <EffortBadge value={opp.effort} />
-                  <span
-                    className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-widest font-[family-name:var(--font-geist-sans)]"
-                    style={{ background: "rgba(217,119,6,0.15)", color: "#FBBF24" }}
-                  >
-                    ROI {opp.roi}
-                  </span>
-                </div>
+                <span
+                  className="flex-shrink-0 px-3 py-1 rounded-lg text-xs font-bold font-[family-name:var(--font-syne)]"
+                  style={{ background: "rgba(217,119,6,0.15)", color: "#FBBF24" }}
+                >
+                  ROI {opp.roi}
+                </span>
               </div>
-              <p className="text-zinc-400 text-xs font-[family-name:var(--font-geist-sans)] leading-relaxed">
+
+              {/* Description */}
+              <p className="text-zinc-300 text-sm font-[family-name:var(--font-geist-sans)] leading-relaxed mb-4 ml-11">
                 {opp.description}
               </p>
+
+              {/* Impact / Effort meters */}
+              <div className="grid grid-cols-2 gap-4 ml-11">
+                <div>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-[family-name:var(--font-geist-sans)] mb-1.5">
+                    Impact
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: opp.impact.toLowerCase() === "fort" ? "90%" : opp.impact.toLowerCase() === "moyen" ? "60%" : "30%",
+                          background: opp.impact.toLowerCase() === "fort" ? "#10B981" : opp.impact.toLowerCase() === "moyen" ? "#F59E0B" : "#6366F1",
+                        }}
+                      />
+                    </div>
+                    <span className="text-xs font-medium font-[family-name:var(--font-geist-sans)]"
+                      style={{
+                        color: opp.impact.toLowerCase() === "fort" ? "#10B981" : opp.impact.toLowerCase() === "moyen" ? "#F59E0B" : "#6366F1",
+                      }}>
+                      {opp.impact}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-[family-name:var(--font-geist-sans)] mb-1.5">
+                    Effort requis
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: opp.effort.toLowerCase() === "fort" || opp.effort.toLowerCase() === "eleve" ? "90%" : opp.effort.toLowerCase() === "moyen" ? "55%" : "25%",
+                          background: "#06B6D4",
+                        }}
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-[#06B6D4] font-[family-name:var(--font-geist-sans)]">
+                      {opp.effort}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>
